@@ -9,7 +9,7 @@ LogiAndes es un proyecto académico de diseño, evaluación y evolución de una 
 ## Estructura del repositorio
 
 - [README.md](README.md) presenta el proyecto y su documentación.
-- [docs/arquitectura.md](docs/arquitectura.md) contiene el esquema del documento de arquitectura.
-- [docs/diagramas/workspace.dsl](docs/diagramas/workspace.dsl) está reservado para el modelo C4.
-- [docs/adr/](docs/adr/) contiene las plantillas de decisiones sobre estilo arquitectónico, recuperación y despliegue.
-- [docs/revision-well-architected.md](docs/revision-well-architected.md) organiza la revisión por pilar.
+- [docs/arquitectura.md](docs/arquitectura.md) documenta requisitos, objetivos de servicio y recuperación, y la arquitectura inicial.
+- [docs/diagramas/workspace.dsl](docs/diagramas/workspace.dsl) contiene el modelo C4 de contexto y contenedores.
+- [docs/adr/](docs/adr/) contiene los registros en elaboración de las decisiones sobre estilo arquitectónico, recuperación y despliegue.
+- [docs/revision-well-architected.md](docs/revision-well-architected.md) contiene la revisión preliminar de los cinco pilares y su registro de riesgos.

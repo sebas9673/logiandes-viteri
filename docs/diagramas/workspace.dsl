@@ -19,29 +19,29 @@ workspace "LogiAndes — arquitectura inicial" "Propuesta híbrida para el proye
 
         logiandes = softwareSystem "Plataforma logística LogiAndes" "Recepción de pedidos, rastreo, despachos y facturación." {
             tags "Plataforma"
-            ingreso = container "Entrada HTTPS" "Distribuye tráfico hacia las réplicas de la aplicación." "AWS Application Load Balancer (propuesto)" {
-                tags "Infraestructura,Redundante"
+            ingreso = container "Entrada HTTPS" "Balanceador gestionado que dirige el tráfico HTTPS a la instancia de aplicación." "AWS Application Load Balancer (propuesto)" {
+                tags "Infraestructura,Gestionado"
             }
-            aplicacion = container "Aplicación logística" "Monolito modular: portal, API de pedidos, seguimiento y recepción GPS/entregas; dos o más réplicas distribuidas en zonas." "PHP / Laravel (propuesto)" {
-                tags "Aplicacion,Redundante"
+            aplicacion = container "Aplicación logística" "Monolito modular: portal, API de pedidos, seguimiento y recepción GPS/entregas; una instancia sin redundancia (SPOF)." "PHP / Laravel (propuesto)" {
+                tags "Aplicacion,SPOF"
             }
-            pedidos = container "Base transaccional" "Persiste pedidos y datos transaccionales." "Amazon RDS PostgreSQL Multi-AZ (propuesto)" {
-                tags "Database,Redundante"
+            pedidos = container "Base transaccional" "Servicio gestionado que persiste pedidos y datos transaccionales en una sola zona, sin réplica de espera (SPOF)." "Amazon RDS PostgreSQL Single-AZ (propuesto)" {
+                tags "Database,Gestionado,SPOF"
             }
             rastreo = container "Almacén de rastreo" "Almacena posiciones GPS y eventos de entrega." "Amazon DynamoDB (propuesto)" {
-                tags "Database,Redundante"
+                tags "Database,Gestionado"
             }
             documentos = container "Documentos y objetos" "Guarda comprobantes electrónicos y documentos operativos." "Amazon S3 con versionado (propuesto)" {
-                tags "Database,Redundante"
+                tags "Database,Gestionado"
             }
             cola = container "Cola de facturación" "Retiene de forma durable solicitudes de facturación mientras el SRI está lento o indisponible." "Amazon SQS (propuesto)" {
-                tags "Cola,Redundante"
+                tags "Cola,Gestionado"
             }
-            worker = container "Procesador de facturación" "Consume la cola, solicita autorizaciones y guarda los resultados; dos o más réplicas." "PHP / Laravel Queue Worker (propuesto)" {
-                tags "Aplicacion,Redundante"
+            worker = container "Procesador de facturación" "Consume la cola, solicita autorizaciones y guarda los resultados; un trabajador sin redundancia (SPOF)." "PHP / Laravel Queue Worker (propuesto)" {
+                tags "Aplicacion,SPOF"
             }
             auditoria = container "Logs y auditoría" "Recopila registros de aplicación, seguridad e integración." "Amazon CloudWatch (propuesto)" {
-                tags "Infraestructura"
+                tags "Infraestructura,Gestionado"
             }
         }
 

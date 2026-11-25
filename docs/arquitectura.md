@@ -131,6 +131,24 @@ Cada ficha corresponde a una fila de la Tabla 2 del PDF. Las ventanas son móvil
 
 ## Diagramas C4
 
+### Nivel 1. Contexto
+
+El cliente corporativo crea pedidos y consulta envíos, el conductor reporta GPS y confirma entregas, y el operador de despacho gestiona despachos y rutas. Los tres interactúan con la plataforma LogiAndes. La plataforma integra Oracle WMS en la instalación local, el SRI para autorización tributaria, la pasarela de pagos para cobros y el proveedor de mapas para geocodificación y rutas. El protocolo de integración con el WMS queda pendiente.
+
+### Nivel 2. Contenedores de la arquitectura inicial
+
+- **Entrada y aplicación.** AWS ALB gestiona la entrada HTTPS y dirige las solicitudes a una sola instancia del monolito modular PHP/Laravel. La aplicación atiende el portal, pedidos, consultas de rastreo y recepción de GPS y entregas.
+- **Datos.** Amazon RDS aloja PostgreSQL Single-AZ sin réplica de espera para pedidos y transacciones. Amazon DynamoDB almacena posiciones GPS y eventos de entrega. Amazon S3 con versionado guarda comprobantes y documentos operativos.
+- **Facturación.** La aplicación persiste las solicitudes en Amazon SQS. Un único Laravel Queue Worker las consume, solicita autorización al SRI y guarda los resultados en S3. La recepción de pedidos y el uso general del portal deben continuar ante una caída del SRI. El encolamiento confirma la recepción para procesamiento y el SRI confirma la autorización después.
+- **Observabilidad.** Amazon CloudWatch recoge registros y métricas de aplicación, seguridad e integración. ALB, RDS, DynamoDB, S3, SQS y CloudWatch son servicios gestionados.
+- **Puntos únicos de fallo (SPOF).** La instancia de aplicación puede interrumpir el portal y la API. La base Single-AZ puede detener las escrituras transaccionales. El trabajador único puede detener el avance de la cola y la emisión de comprobantes.
+
+[Modelo Structurizr DSL](diagramas/workspace.dsl)
+
+### Brechas por validar
+
+La línea base es una propuesta. Los costos carecen de una estimación validada y el cumplimiento de los SLO, RTO y RPO requiere pruebas. En particular, RDS Single-AZ no ha demostrado un RTO ≤ 30 minutos ni un RPO ≤ 1 minuto. La redundancia de aplicación se abordará en la Tarea 2 y la replicación de datos en la Tarea 3. Quedan pendientes las pruebas de restauración y reconciliación y la verificación del SLO de seguimiento bajo carga 3×.
+
 ## Revisión Well-Architected
 
 ## Decisiones arquitectónicas
