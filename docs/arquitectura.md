@@ -64,7 +64,7 @@ Con 40.000 envíos diarios durante 30 días, se proyectan 1.200.000 envíos. El 
 
 ### Tabla 2. Objetivos por servicio y almacén
 
-Cada ficha corresponde a una fila de la Tabla 2 del PDF. Las ventanas son móviles. Los SLO y límites de recuperación marcados como propuestos requieren validación. Para un SLI basado en conteos, el presupuesto es `⌊(1 − objetivo) × total elegible⌋`, con el objetivo expresado como fracción. Una ventana sin observaciones elegibles queda sin evaluación. El caso confirma una disponibilidad contractual de la API del 99,9 %. Quedan por confirmar la fórmula, la ventana y las exclusiones contractuales para calcular su presupuesto.
+Las ventanas son móviles. Los SLO y límites de recuperación marcados como propuestos requieren validación. Para un SLI basado en conteos, el presupuesto es `⌊(1 − objetivo) × total elegible⌋`, con el objetivo expresado como fracción. Una ventana sin observaciones elegibles queda sin evaluación. El caso confirma una disponibilidad contractual de la API del 99,9 %. Quedan por confirmar la fórmula, la ventana y las exclusiones contractuales para calcular su presupuesto.
 
 #### Pedidos
 
@@ -85,7 +85,7 @@ Cada ficha corresponde a una fila de la Tabla 2 del PDF. Las ventanas son móvil
 #### Facturación
 
 - **Servicio/almacén.** Encolamiento de solicitudes y autorización electrónica por el SRI.
-- **SLI (fórmula).** Recepción = solicitudes válidas confirmadas tras persistirlas en la cola ÷ total de solicitudes válidas recibidas × 100. Autorización = comprobantes de la cohorte de solicitudes aceptadas que el SRI autoriza dentro del plazo acordado ÷ total de comprobantes de esa cohorte cuyo plazo ya venció × 100.
+- **SLI (fórmula).** Recepción = solicitudes válidas confirmadas tras persistirlas en la cola ÷ total de solicitudes válidas recibidas × 100. Autorización = comprobantes de las solicitudes aceptadas que el SRI autoriza dentro del plazo acordado ÷ total de comprobantes de esas solicitudes cuyo plazo ya venció × 100.
 - **SLO y ventana.** Recepción ≥ 99,9 % en 30 días (propuesto). Para la autorización se propone una ventana de 30 días por fecha de vencimiento. El porcentaje objetivo y el plazo desde el encolamiento quedan pendientes de validación. Los comprobantes pendientes o rechazados al vencer el plazo se registran como incumplimientos.
 - **Presupuesto de error.** Para la recepción, el margen es de hasta 0,1 % de las solicitudes válidas en 30 días. Cuando se valide el objetivo de autorización, aplicar la fórmula de conteos a los comprobantes cuyo plazo venció en la ventana.
 - **RTO y RPO.** Para los comprobantes almacenados, aplican los objetivos de la ficha de documentos/objetos. Para restablecer el flujo, también hay que recuperar la cola persistente y reanudar el consumo.
@@ -103,7 +103,7 @@ Cada ficha corresponde a una fila de la Tabla 2 del PDF. Las ventanas son móvil
 - **Servicio/almacén.** Registros de pedidos y demás escrituras transaccionales.
 - **SLI (fórmula).** En una prueba de recuperación, RTO observado = instante en que se reanudan y verifican las lecturas y escrituras − inicio de la interrupción. RPO observado = inicio de la interrupción − instante del último punto de recuperación consistente.
 - **SLO y ventana.** Evaluar en cada ejercicio de recuperación. Queda por definir y validar la frecuencia de los ejercicios.
-- **Presupuesto de error.** Se evalúa cada ejercicio contra ambos límites de recuperación.
+- **Presupuesto de error.** No aplica; se evalúa mediante RTO/RPO
 - **RTO y RPO.** RTO ≤ 30 minutos y RPO ≤ 1 minuto, objetivos propuestos. El RTO limita cuánto puede detenerse el registro de pedidos. El RPO acota el intervalo de transacciones confirmadas que puede requerir reconciliación con el WMS o con los clientes.
 
 #### Datos de rastreo
@@ -119,7 +119,7 @@ Cada ficha corresponde a una fila de la Tabla 2 del PDF. Las ventanas son móvil
 - **Servicio/almacén.** Comprobantes electrónicos y otros documentos operativos almacenados.
 - **SLI (fórmula).** En cada ejercicio, RTO observado = instante en que se verifica que los documentos recuperados pueden consultarse − inicio de la interrupción. RPO observado = inicio de la interrupción − instante del último punto de recuperación consistente de documentos y sus referencias.
 - **SLO y ventana.** Evaluar en cada ejercicio de recuperación. Queda por definir y validar la frecuencia de los ejercicios.
-- **Presupuesto de error.** Se evalúa cada ejercicio contra ambos límites de recuperación.
+- **Presupuesto de error.** No aplica; se evalúa mediante RTO/RPO
 - **RTO y RPO.** RTO ≤ 4 horas y RPO ≤ 15 minutos, objetivos propuestos. El RTO limita el tiempo sin acceso a comprobantes y soportes operativos. El RPO acota el conjunto de documentos recientes que habría que recuperar y cotejar con su origen. Validar ambos límites con el flujo de facturación y los plazos aplicables.
 
 ### Dependencias para la disponibilidad compuesta
@@ -155,16 +155,16 @@ Queda por validar la estimación de costos y comprobar los SLO, RTO y RPO. Para 
 
 La revisión documental de la arquitectura inicial cubrió cinco pilares: fiabilidad, seguridad, rendimiento, costos y excelencia operativa (Amazon Web Services, s. f.; Microsoft, 2025). La tabla resume los hallazgos y las acciones del [registro de riesgos](revision-well-architected.md).
 
-| Riesgo | Pilar | Hallazgo | Clasificación | Mejora | ADR relacionado |
-| --- | --- | --- | --- | --- | --- |
-| F-01 | Fiabilidad | Una sola instancia de aplicación atiende el portal, los pedidos y el rastreo. | HRI | Incorporar redundancia y probar la pérdida de una instancia bajo tráfico. | ADR-0001 y ADR-0002 |
-| F-02 | Fiabilidad | PostgreSQL en RDS Single-AZ carece de réplica de espera. | HRI | Evaluar la replicación y medir el tiempo de recuperación y la pérdida de datos. | ADR-0002 |
-| F-03 | Fiabilidad | Una falla del Oracle WMS o del enlace puede afectar los pedidos si el alta exige confirmación síncrona. El protocolo sigue por definir. | HRI | Definir el contrato de integración y probar la pérdida del enlace y la reconciliación posterior. | ADR-0003 |
-| S-01 | Seguridad | Las credenciales compartidas del entorno actual impiden atribuir accesos a datos personales. | HRI | Asignar credenciales individuales, limitar privilegios y comprobar el registro del 100 % de los accesos auditables definidos. | ADR-0003, por la protección de datos personales |
-| P-01 | Rendimiento | La capacidad de la aplicación y del almacén de rastreo a 3× todavía requiere pruebas. | HRI | Probar el SLO de `GET /track` a 3× y medir respuestas HTTP 2xx en menos de 300 ms, p95, p99 y errores. | ADR-0001 |
-| C-01 | Costos | Falta validar el costo de los servicios cloud propuestos. | MRI | Estimar el costo con carga habitual y pico. Comparar con USD 8.000 mensuales y con la referencia de USD 6,50 por cada 1.000 envíos. | ADR-0003 |
-| O-01 | Excelencia operativa | Falta evidencia de la configuración de respaldos y de ejercicios de restauración. | HRI | Documentar la configuración y el procedimiento. Ejecutar una restauración y registrar RTO, RPO y datos reconciliados. | ADR-0002 |
-| O-02 | Excelencia operativa | Un solo trabajador procesa la cola de facturación. | MRI | Medir la antigüedad de los mensajes y probar la reanudación del consumo y la gestión de duplicados. | ADR-0001 y ADR-0002 |
+| Riesgo | Pilar | Hallazgo | Clasificación | Mejora | ADR relacionado | Tarea |
+| --- | --- | --- | --- | --- | --- | --- |
+| F-01 | Fiabilidad | Una sola instancia de aplicación atiende el portal, los pedidos y el rastreo. | HRI | Incorporar redundancia y probar la pérdida de una instancia bajo tráfico. | ADR-0001 y ADR-0002 | Tarea 2 |
+| F-02 | Fiabilidad | PostgreSQL en RDS Single-AZ carece de réplica de espera. | HRI | Evaluar la replicación y medir el tiempo de recuperación y la pérdida de datos. | ADR-0002 | Tarea 3 |
+| F-03 | Fiabilidad | Una falla del Oracle WMS o del enlace puede afectar los pedidos si el alta exige confirmación síncrona. El protocolo sigue por definir. | HRI | Definir el contrato de integración y probar la pérdida del enlace y la reconciliación posterior. | ADR-0003 | Proyecto Final (propuesto) |
+| S-01 | Seguridad | Las credenciales compartidas del entorno actual impiden atribuir accesos a datos personales. | HRI | Asignar credenciales individuales, limitar privilegios y comprobar el registro del 100 % de los accesos auditables definidos. | ADR-0003, por la protección de datos personales | Proyecto Final (propuesto) |
+| P-01 | Rendimiento | La capacidad de la aplicación y del almacén de rastreo a 3× todavía requiere pruebas. | HRI | Probar el SLO de `GET /track` a 3× y medir respuestas HTTP 2xx en menos de 300 ms, p95, p99 y errores. | ADR-0001 | Proyecto Final (propuesto) |
+| C-01 | Costos | Falta validar el costo de los servicios cloud propuestos. | MRI | Estimar el costo con carga habitual y pico. Comparar con USD 8.000 mensuales y con la referencia de USD 6,50 por cada 1.000 envíos. | ADR-0003 | Proyecto Final (propuesto) |
+| O-01 | Excelencia operativa | Falta evidencia de la configuración de respaldos y de ejercicios de restauración. | HRI | Documentar la configuración y el procedimiento. Ejecutar una restauración y registrar RTO, RPO y datos reconciliados. | ADR-0002 | Proyecto Final (propuesto) |
+| O-02 | Excelencia operativa | Un solo trabajador procesa la cola de facturación. | MRI | Medir la antigüedad de los mensajes y probar la reanudación del consumo y la gestión de duplicados. | ADR-0001 y ADR-0002 | Proyecto Final (propuesto) |
 
 ## Decisiones arquitectónicas
 
