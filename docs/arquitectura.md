@@ -62,6 +62,73 @@ A razón de 40.000 envíos diarios durante 30 días, se proyectan 1.200.000 env�
 
 ## Objetivos de servicio y recuperación
 
+### Tabla 2. Objetivos por servicio y almacén
+
+Cada ficha corresponde a una fila de la Tabla 2 del PDF. Las ventanas son móviles. Para un SLI basado en conteos, el presupuesto es `⌊(1 − objetivo) × total elegible⌋`, con el objetivo expresado como fracción. Una ventana sin observaciones elegibles queda sin evaluación. El caso confirma una disponibilidad contractual de la API del 99,9 %. Quedan por confirmar la fórmula, la ventana y las exclusiones contractuales para calcular su presupuesto.
+
+#### Pedidos
+
+- **Servicio/almacén.** Recepción de pedidos.
+- **SLI (fórmula).** Solicitudes válidas de alta que reciben confirmación después de guardar el pedido de forma persistente ÷ total de solicitudes válidas de alta × 100.
+- **SLO y ventana.** ≥ 99,9 % en 30 días, propuesta pendiente de validación.
+- **Presupuesto de error.** Hasta 0,1 % de las solicitudes válidas en 30 días, equivalente a 1 por cada 1.000.
+- **RTO y RPO.** Aplican los objetivos de la base transaccional a los datos de pedidos. La recuperación del flujo completo también depende del WMS si su confirmación es obligatoria.
+
+#### Rastreo
+
+- **Servicio/almacén.** Consulta de seguimiento `GET /track`.
+- **SLI (fórmula).** Solicitudes `GET /track` con respuesta HTTP 2xx en menos de 300 ms ÷ total de solicitudes al endpoint × 100.
+- **SLO y ventana.** ≥ 99,9 % en 30 días, según la referencia del taller.
+- **Presupuesto de error.** Hasta 0,1 % de las solicitudes en 30 días, equivalente a 1 por cada 1.000. Una solicitud consume presupuesto si no cumple uno o ambos criterios y se cuenta una sola vez.
+- **RTO y RPO.** Véase la ficha de datos de rastreo.
+
+#### Facturación
+
+- **Servicio/almacén.** Encolamiento de solicitudes y autorización electrónica por el SRI.
+- **SLI (fórmula).** Recepción = solicitudes válidas confirmadas tras persistirlas en la cola ÷ total de solicitudes válidas recibidas × 100. Autorización = comprobantes de la cohorte de solicitudes aceptadas que el SRI autoriza dentro del plazo acordado ÷ total de comprobantes de esa cohorte cuyo plazo ya venció × 100.
+- **SLO y ventana.** Recepción ≥ 99,9 % en 30 días, propuesta pendiente de validación. Para la autorización se propone una ventana de 30 días por fecha de vencimiento. El porcentaje objetivo y el plazo desde el encolamiento quedan pendientes de validación. Los comprobantes pendientes o rechazados al vencer el plazo se registran como incumplimientos.
+- **Presupuesto de error.** Recepción: hasta 0,1 % de las solicitudes válidas en 30 días. Autorización: aplicar la fórmula de conteos a los comprobantes cuyo plazo venció en la ventana cuando se valide el objetivo.
+- **RTO y RPO.** Véase la ficha de documentos/objetos para los comprobantes almacenados. La recuperación del flujo también requiere recuperar la cola persistente y reanudar el procesamiento del consumidor.
+
+#### Portal
+
+- **Servicio/almacén.** Acceso a la vista principal del portal.
+- **SLI (fórmula).** Minutos con una comprobación sintética exitosa de carga de la vista principal ÷ minutos de la ventana × 100. Se propone una comprobación por minuto y registrar como fallidos los minutos sin resultado.
+- **SLO y ventana.** ≥ 99,9 % en 30 días, propuesta pendiente de validación.
+- **Presupuesto de error.** Hasta 43,2 minutos por cada ventana de 43.200 minutos (30 días). Con medición por minutos completos, se admiten hasta 43 minutos fallidos.
+- **RTO y RPO.** Los objetivos de los almacenes aplican según los datos que consulta cada función del portal.
+
+#### Base transaccional
+
+- **Servicio/almacén.** Registros de pedidos y demás escrituras transaccionales.
+- **SLI (fórmula).** En una prueba de recuperación, RTO observado = instante en que se reanudan y verifican las lecturas y escrituras − inicio de la interrupción. RPO observado = inicio de la interrupción − instante del último punto de recuperación consistente.
+- **SLO y ventana.** Evaluar en cada ejercicio de recuperación. Frecuencia de ejercicios pendiente de validación.
+- **Presupuesto de error.** Se evalúa cada ejercicio contra ambos límites de recuperación.
+- **RTO y RPO.** RTO ≤ 30 minutos y RPO ≤ 1 minuto, propuestas pendientes de validación. El RTO limita cuánto puede detenerse el registro de pedidos. El RPO acota el intervalo de transacciones confirmadas que puede requerir reconciliación con el WMS o con los clientes.
+
+#### Datos de rastreo
+
+- **Servicio/almacén.** Posiciones GPS y eventos de entrega.
+- **SLI (fórmula).** Eventos de entrega confirmados y almacenados correctamente ÷ total de eventos de entrega confirmados × 100.
+- **SLO y ventana.** ≥ 99,99 %, según la referencia del profesor. Ventana de 30 días propuesta, pendiente de validación.
+- **Presupuesto de error.** Hasta 0,01 % de los eventos de entrega confirmados, equivalente a 1 por cada 10.000.
+- **RTO y RPO.** RTO ≤ 30 minutos y RPO ≤ 1 minuto, propuestas pendientes de validación. El RTO limita cuánto tiempo pueden quedar desactualizadas las consultas. El RPO acota el tramo de telemetría reciente y confirmaciones que habría que recuperar o reconciliar. La prueba debe verificar también el objetivo de fiabilidad de las confirmaciones.
+
+#### Documentos/objetos
+
+- **Servicio/almacén.** Comprobantes electrónicos y otros documentos operativos almacenados.
+- **SLI (fórmula).** En cada ejercicio, RTO observado = instante en que se verifica que los documentos recuperados pueden consultarse − inicio de la interrupción. RPO observado = inicio de la interrupción − instante del último punto de recuperación consistente de documentos y sus referencias.
+- **SLO y ventana.** Evaluar en cada ejercicio de recuperación. Frecuencia de ejercicios pendiente de validación.
+- **Presupuesto de error.** Se evalúa cada ejercicio contra ambos límites de recuperación.
+- **RTO y RPO.** RTO ≤ 4 horas y RPO ≤ 15 minutos, propuestas pendientes de validación. El RTO limita el tiempo sin acceso a comprobantes y soportes operativos. El RPO acota el conjunto de documentos recientes que habría que recuperar y cotejar con su origen. Validar ambos límites con el flujo de facturación y los plazos aplicables.
+
+### Dependencias para la disponibilidad compuesta
+
+- **Pedidos.** Medir el recorrido que incluye la recepción y la escritura transaccional. Si el alta necesita confirmación síncrona del Oracle WMS local, tanto el WMS como la conectividad entre nube y centro local cuentan en la disponibilidad de pedidos. Si la confirmación se difiere, medir también la finalización del pedido y el atraso de sincronización con el WMS.
+- **Rastreo.** Medir el recorrido de la API hasta la lectura de datos. La recepción y persistencia de GPS y eventos de entrega afectan la vigencia de lo que devuelve la API. Una respuesta rápida puede contener datos desactualizados.
+- **Facturación y portal.** El encolamiento depende de la cola persistente. La autorización depende además del consumidor, la conectividad con el SRI y la respuesta del SRI. Ante una caída del SRI, las solicitudes quedan pendientes y su procesamiento se reanuda al recuperarse la integración. Verificar que el incidente permita seguir recibiendo pedidos y usando la vista principal del portal. Medir aparte las funciones del portal que consultan pedidos o rastreo.
+- **Comprobación.** Medir cada recorrido de extremo a extremo y correlacionar fallos de dependencias obligatorias con fallos observados por el usuario. Considerar fallos compartidos de conectividad y almacenamiento antes de estimar la disponibilidad a partir de componentes.
+
 ## Diagramas C4
 
 ## Revisión Well-Architected
