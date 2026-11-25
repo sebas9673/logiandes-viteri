@@ -1,8 +1,8 @@
 # Revisión Well-Architected preliminar
 
-Esta revisión preliminar cubre los cinco pilares de la arquitectura inicial propuesta para LogiAndes.
+Para evaluar la arquitectura inicial de LogiAndes se consideran cinco aspectos: fiabilidad, seguridad, rendimiento, costos y operación.
 
-Los riesgos identificados se clasifican como altos (HRI) o medios (MRI), según su impacto. Cada hallazgo incluye una mejora y, cuando está definida, la tarea que la aborda.
+La revisión identifica los principales riesgos de la propuesta, su impacto y las mejoras necesarias. Los riesgos se clasifican como altos (HRI) o medios (MRI) y se relacionan con las siguientes etapas del proyecto.
 
 ## Fiabilidad
 
