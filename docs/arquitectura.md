@@ -153,6 +153,35 @@ Queda por validar la estimación de costos y comprobar los SLO, RTO y RPO. Para 
 
 ## Revisión Well-Architected
 
+La revisión documental de la arquitectura inicial cubrió cinco pilares: fiabilidad, seguridad, rendimiento, costos y excelencia operativa (Amazon Web Services, s. f.; Microsoft, 2025). La tabla resume los hallazgos y las acciones del [registro de riesgos](revision-well-architected.md).
+
+| Riesgo | Pilar | Hallazgo | Clasificación | Mejora | ADR relacionado |
+| --- | --- | --- | --- | --- | --- |
+| F-01 | Fiabilidad | Una sola instancia de aplicación atiende el portal, los pedidos y el rastreo. | HRI | Incorporar redundancia y probar la pérdida de una instancia bajo tráfico. | ADR-0001 y ADR-0002 |
+| F-02 | Fiabilidad | PostgreSQL en RDS Single-AZ carece de réplica de espera. | HRI | Evaluar la replicación y medir el tiempo de recuperación y la pérdida de datos. | ADR-0002 |
+| F-03 | Fiabilidad | Una falla del Oracle WMS o del enlace puede afectar los pedidos si el alta exige confirmación síncrona. El protocolo sigue por definir. | HRI | Definir el contrato de integración y probar la pérdida del enlace y la reconciliación posterior. | ADR-0003 |
+| S-01 | Seguridad | Las credenciales compartidas del entorno actual impiden atribuir accesos a datos personales. | HRI | Asignar credenciales individuales, limitar privilegios y comprobar el registro del 100 % de los accesos auditables definidos. | ADR-0003, por la protección de datos personales |
+| P-01 | Rendimiento | La capacidad de la aplicación y del almacén de rastreo a 3× todavía requiere pruebas. | HRI | Probar el SLO de `GET /track` a 3× y medir respuestas HTTP 2xx en menos de 300 ms, p95, p99 y errores. | ADR-0001 |
+| C-01 | Costos | Falta validar el costo de los servicios cloud propuestos. | MRI | Estimar el costo con carga habitual y pico. Comparar con USD 8.000 mensuales y con la referencia de USD 6,50 por cada 1.000 envíos. | ADR-0003 |
+| O-01 | Excelencia operativa | Falta evidencia de la configuración de respaldos y de ejercicios de restauración. | HRI | Documentar la configuración y el procedimiento. Ejecutar una restauración y registrar RTO, RPO y datos reconciliados. | ADR-0002 |
+| O-02 | Excelencia operativa | Un solo trabajador procesa la cola de facturación. | MRI | Medir la antigüedad de los mensajes y probar la reanudación del consumo y la gestión de duplicados. | ADR-0001 y ADR-0002 |
+
 ## Decisiones arquitectónicas
 
+- [ADR-0001. Estilo arquitectónico](adr/0001-estilo-arquitectonico.md). Se eligió un monolito modular PHP/Laravel para simplificar el despliegue y el diagnóstico con un equipo de seis personas. Un trabajador separado consume las solicitudes de facturación de la cola persistente, de modo que una caída del SRI no bloquee la recepción de pedidos.
+- [ADR-0002. Estrategia de recuperación](adr/0002-estrategia-de-recuperacion.md). La estrategia inicial se basa en respaldos y restauración. También contempla recuperar la aplicación y el trabajador, y reanudar el consumo de la cola. RDS Single-AZ carece de réplica de espera y todavía requiere pruebas para demostrar un RTO ≤ 30 minutos y un RPO ≤ 1 minuto.
+- [ADR-0003. Modelo de despliegue](adr/0003-modelo-de-despliegue.md). Se eligió un despliegue híbrido para mantener Oracle WMS en la instalación local mientras la aplicación se despliega en AWS. El protocolo y las características del enlace siguen por definir. De la integración dependerá el efecto de una falla del WMS sobre los pedidos.
+
 ## Conclusiones
+
+La arquitectura inicial organiza pedidos, rastreo y facturación con una solución relativamente sencilla para un equipo de seis personas. El monolito modular concentra la operación de la aplicación y la cola permite procesar la facturación de forma asíncrona. Así, la autorización del SRI queda fuera del flujo de recepción de pedidos.
+
+La instancia única de aplicación, RDS Single-AZ y el trabajador único son puntos únicos de falla. El alcance de una interrupción del WMS dependerá de cómo se defina su integración. También falta comprobar la recuperación mediante restauración, evaluar el rendimiento a 3× y validar la estimación de costos. Los SLO, RTO y RPO siguen siendo objetivos de diseño.
+
+La redundancia de aplicación en la Tarea 2 permitirá reducir la dependencia de una sola instancia. La replicación de datos en la Tarea 3 abordará la recuperación de la base transaccional. Las pruebas de falla y restauración permitirán medir cuánto aportan estas mejoras a los objetivos de recuperación.
+
+## Referencias
+
+Amazon Web Services. (s. f.). *Definitions*. AWS Well-Architected Framework. https://docs.aws.amazon.com/wellarchitected/latest/framework/definitions.html
+
+Microsoft. (2025, 31 de octubre). *Pilares de Microsoft Azure Well-Architected Framework*. Microsoft Learn. https://learn.microsoft.com/es-es/azure/well-architected/pillars
