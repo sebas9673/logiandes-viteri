@@ -85,7 +85,7 @@ Las ventanas son móviles. Los SLO y límites de recuperación marcados como pro
 #### Facturación
 
 - **Servicio/almacén.** Encolamiento de solicitudes y autorización electrónica por el SRI.
-- **SLI (fórmula).** Recepción = solicitudes válidas confirmadas tras persistirlas en la cola ÷ total de solicitudes válidas recibidas × 100. Autorización = comprobantes de las solicitudes aceptadas que el SRI autoriza dentro del plazo acordado ÷ total de comprobantes de esas solicitudes cuyo plazo ya venció × 100.
+- **SLI (fórmula).** Recepción = solicitudes válidas confirmadas tras persistirlas en la cola ÷ total de solicitudes válidas recibidas × 100. Autorización = comprobantes autorizados por el SRI dentro del plazo acordado, cuyo plazo venció en la ventana de evaluación ÷ total de comprobantes cuyo plazo venció en esa misma ventana × 100.
 - **SLO y ventana.** Recepción ≥ 99,9 % en 30 días (propuesto). Para la autorización se propone una ventana de 30 días por fecha de vencimiento. El porcentaje objetivo y el plazo desde el encolamiento quedan pendientes de validación. Los comprobantes pendientes o rechazados al vencer el plazo se registran como incumplimientos.
 - **Presupuesto de error.** Para la recepción, el margen es de hasta 0,1 % de las solicitudes válidas en 30 días. Cuando se valide el objetivo de autorización, aplicar la fórmula de conteos a los comprobantes cuyo plazo venció en la ventana.
 - **RTO y RPO.** Para los comprobantes almacenados, aplican los objetivos de la ficha de documentos/objetos. Para restablecer el flujo, también hay que recuperar la cola persistente y reanudar el consumo.
