@@ -10,21 +10,21 @@ Propuesto para la Tarea 1.
 
 ## Contexto
 
-La aplicación y el trabajador son únicos. RDS PostgreSQL opera en una sola zona y carece de réplica de espera. Una interrupción puede detener pedidos, escrituras o autorizaciones. El caso carece de una estrategia formal de recuperación.
+La línea base propone una instancia de aplicación, un trabajador y PostgreSQL en RDS Single-AZ sin réplica de espera. Una falla puede detener los pedidos, las escrituras o las autorizaciones. LogiAndes todavía no cuenta con una estrategia formal de recuperación.
 
 ## Alternativas
 
-- Respaldar y restaurar la base, recuperar la aplicación y el trabajador y reanudar el procesamiento. El tiempo depende del respaldo recuperable y de los pasos de restauración y verificación.
-- Incorporar instancias redundantes y una réplica de espera para los datos transaccionales. Reduce la dependencia de reconstruir componentes tras un fallo y añade costo y operación.
+- Respaldar y restaurar la base, recuperar la aplicación y el trabajador y reanudar el procesamiento. El tiempo de recuperación depende de la disponibilidad del respaldo y de cuánto duren la restauración y las verificaciones.
+- Incorporar instancias redundantes y una réplica de espera para los datos transaccionales. Reduce la necesidad de reconstruir componentes después de una falla. También aumenta el costo y el trabajo operativo.
 
 ## Decisión
 
-Proponer respaldo y restauración para la línea base Single-AZ, con recuperación de la aplicación y el trabajador y reanudación desde la cola persistente. Quedan pendientes la configuración y evidencia de respaldos y los ejercicios de recuperación. Abordar redundancia de aplicación en la Tarea 2 y replicación de datos en la Tarea 3.
+La estrategia inicial propone restaurar la base Single-AZ desde un respaldo, recuperar la aplicación y el trabajador, y reanudar el consumo de la cola persistente. Queda por configurar los respaldos, documentar la evidencia y ejecutar los ejercicios de recuperación. La Tarea 2 aborda la redundancia de la aplicación y la Tarea 3, la replicación de datos.
 
 ## Consecuencias
 
 - **Positivas.** Permite definir y ensayar un procedimiento de recuperación para la línea base.
-- **Negativas.** La interrupción puede durar hasta que la restauración y las verificaciones terminen. Los objetivos transaccionales de RTO ≤ 30 minutos y RPO ≤ 1 minuto todavía carecen de evidencia en Single-AZ.
+- **Negativas.** La interrupción puede durar hasta que la restauración y las verificaciones terminen. Para la base Single-AZ propuesta, falta demostrar que se cumplen los objetivos transaccionales de RTO y RPO. Las pruebas permitirán determinar si hace falta mejorar la infraestructura.
 
 ## Cumplimiento
 

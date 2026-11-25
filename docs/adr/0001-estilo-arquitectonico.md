@@ -10,21 +10,21 @@ Propuesto para la Tarea 1.
 
 ## Contexto
 
-La plataforma debe atender pedidos, seguimiento y entregas, con un equipo de seis personas en TI. La autorización de comprobantes depende del SRI y debe ejecutarse fuera del recorrido de pedidos.
+Un equipo de seis personas en TI debe operar los flujos de pedidos, seguimiento y entregas. La autorización de comprobantes depende del SRI y debe procesarse por separado para evitar que una falla del SRI bloquee los pedidos.
 
 ## Alternativas
 
 - Monolito modular PHP/Laravel y un trabajador de facturación que se ejecuta por separado. Un código base y límites definidos entre módulos simplifican el despliegue y el diagnóstico.
-- Microservicios por capacidad. Permitirían desplegar y escalar capacidades por separado, con más integraciones, despliegues y diagnóstico distribuido.
+- Microservicios por capacidad. Permitirían desplegar y escalar capacidades por separado, a costa de mantener más integraciones y despliegues y de diagnosticar fallos entre servicios.
 
 ## Decisión
 
-Proponer un monolito modular PHP/Laravel en una instancia y un Laravel Queue Worker independiente en ejecución para consumir Amazon SQS y consultar al SRI. El trabajador forma parte de la misma solución modular y comparte su ciclo de desarrollo.
+Proponer un monolito modular PHP/Laravel en una instancia y un Laravel Queue Worker que se ejecuta en un proceso separado, lee los mensajes de Amazon SQS y consulta al SRI. El trabajador forma parte de la misma solución modular y comparte su ciclo de desarrollo.
 
 ## Consecuencias
 
-- **Positivas.** Menos unidades que mantener para el equipo y procesamiento de facturas fuera del recorrido de pedidos.
-- **Negativas.** Los módulos de la aplicación escalan como una unidad. La aplicación y el trabajador son puntos únicos de fallo. La confirmación de encolamiento requiere seguimiento posterior de la autorización.
+- **Positivas.** El equipo mantiene menos unidades. El procesamiento de facturas queda fuera del flujo de pedidos.
+- **Negativas.** Los módulos de la aplicación escalan como una unidad. La aplicación y el trabajador son puntos únicos de fallo. Guardar la solicitud en la cola confirma su recepción. El trabajador debe dar seguimiento al comprobante hasta recibir la respuesta de autorización del SRI.
 
 ## Cumplimiento
 
