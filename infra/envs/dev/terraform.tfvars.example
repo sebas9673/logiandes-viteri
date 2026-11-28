@@ -1,0 +1,6 @@
+# Ejemplo para futuras variables de entorno, no se carga automáticamente.
+# La configuración actual define valores de máquinas y redes en main.tf.
+# NO almacenar aquí contraseñas, tokens ni claves privadas.
+# Autenticación de Proxmox: PROXMOX_VE_API_TOKEN / ENDPOINT.
+# Autenticación del backend: TF_HTTP_ADDRESS, TF_HTTP_USERNAME, TF_HTTP_PASSWORD, etc.
+# Cifrado OpenTofu: TF_VAR_state_passphrase.

@@ -4,3 +4,14 @@
 *.tfplan
 *.tfvars
 !terraform.tfvars.example
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_ed25519
+id_rsa
+logiandes_ed25519
+logiandes_ed25519.pub
+*.p12
+*.pfx

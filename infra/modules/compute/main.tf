@@ -57,10 +57,3 @@ resource "proxmox_virtual_environment_vm" "servers" {
 
   serial_device {}
 }
-
-output "vm_ids" {
-  value = {
-    for name, vm in proxmox_virtual_environment_vm.servers :
-    name => vm.vm_id
-  }
-}
